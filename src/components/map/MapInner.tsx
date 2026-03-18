@@ -1,0 +1,211 @@
+'use client'
+
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { MapContainer, TileLayer, useMap, useMapEvents, CircleMarker, Tooltip } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { useMapProperties } from '@/hooks/useMapProperties'
+import type { MapBounds, MapProperty, PropertyFilters } from '@/types'
+import { formatCurrencyShort } from '@/lib/utils'
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, CITY_MAP_ZOOM } from '@/lib/constants'
+import { PropertyMapCard } from './PropertyMapCard'
+import { useGeolocation } from '@/contexts/GeolocationContext'
+
+// Fix ícones padrão do Leaflet com Webpack/Next.js
+delete (L.Icon.Default.prototype as any)._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+})
+
+interface MapInnerProps {
+  filters: PropertyFilters
+  onPropertyClick?: (id: string) => void
+}
+
+// Componente interno que detecta mudanças de viewport
+function MapEvents({
+  onBoundsChange,
+}: {
+  onBoundsChange: (bounds: MapBounds) => void
+}) {
+  const map = useMapEvents({
+    moveend: () => updateBounds(map),
+    zoomend: () => updateBounds(map),
+    load: () => updateBounds(map),
+  })
+
+  function updateBounds(m: L.Map) {
+    const b = m.getBounds()
+    onBoundsChange({
+      lat_min: b.getSouth(),
+      lon_min: b.getWest(),
+      lat_max: b.getNorth(),
+      lon_max: b.getEast(),
+    })
+  }
+
+  useEffect(() => {
+    // Dispara imediatamente ao montar
+    const b = map.getBounds()
+    onBoundsChange({
+      lat_min: b.getSouth(),
+      lon_min: b.getWest(),
+      lat_max: b.getNorth(),
+      lon_max: b.getEast(),
+    })
+  }, [])
+
+  return null
+}
+
+// Gerencia os markers no mapa
+function PropertyMarkers({
+  properties,
+  selectedId,
+  onSelect,
+}: {
+  properties: MapProperty[]
+  selectedId: string | null
+  onSelect: (p: MapProperty | null) => void
+}) {
+  const map = useMap()
+  const markersRef = useRef<L.Marker[]>([])
+
+  useEffect(() => {
+    // Remove markers existentes
+    markersRef.current.forEach((m) => m.remove())
+    markersRef.current = []
+
+    properties.forEach((prop) => {
+      const isSelected = prop.id === selectedId
+      const priceLabel = formatCurrencyShort(prop.price_cents)
+      const type = prop.listing_type
+      const color = type === 'sale' ? '#16a34a' : '#2563eb'
+      const borderColor = isSelected ? '#f59e0b' : color
+
+      const photoHtml = prop.cover_photo_url
+        ? `<img src="${prop.cover_photo_url}" style="width:100%;height:52px;object-fit:cover;display:block;" />`
+        : `<div style="width:100%;height:52px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:20px;">🏠</div>`
+
+      const icon = L.divIcon({
+        className: '',
+        html: `
+          <div class="map-pin-item" style="
+            width:80px;
+            border-radius:12px;
+            overflow:hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            border: 2.5px solid ${borderColor};
+            background:white;
+            cursor:pointer;
+            transform: ${isSelected ? 'scale(1.12)' : 'scale(1)'};
+            transition: transform 0.15s ease;
+          ">
+            ${photoHtml}
+            <div style="
+              background:${color};
+              color:white;
+              text-align:center;
+              font-size:10px;
+              font-weight:700;
+              padding:3px 4px;
+              line-height:1.2;
+              white-space:nowrap;
+              overflow:hidden;
+              text-overflow:ellipsis;
+            ">${priceLabel}</div>
+          </div>
+        `,
+        iconSize: [80, 76],
+        iconAnchor: [40, 76],
+      })
+
+      const marker = L.marker([prop.latitude, prop.longitude], { icon })
+        .addTo(map)
+        .on('click', () => onSelect(prop))
+
+      markersRef.current.push(marker)
+    })
+
+    return () => {
+      markersRef.current.forEach((m) => m.remove())
+      markersRef.current = []
+    }
+  }, [properties, selectedId, map])
+
+  return null
+}
+
+export default function MapInner({ filters, onPropertyClick }: MapInnerProps) {
+  const [bounds, setBounds] = useState<MapBounds | null>(null)
+  const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(null)
+  const { lat: userLat, lng: userLng } = useGeolocation()
+
+  // Debounce de 400ms para evitar flood de queries ao pan
+  const boundsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const handleBoundsChange = useCallback((newBounds: MapBounds) => {
+    if (boundsTimerRef.current) clearTimeout(boundsTimerRef.current)
+    boundsTimerRef.current = setTimeout(() => setBounds(newBounds), 400)
+  }, [])
+
+  const { data: properties = [], isFetching } = useMapProperties(bounds, filters)
+
+  // Centraliza na cidade do usuário se disponível
+  const mapCenter: [number, number] = userLat && userLng
+    ? [userLat, userLng]
+    : DEFAULT_MAP_CENTER
+  const mapZoom = userLat && userLng ? CITY_MAP_ZOOM : DEFAULT_MAP_ZOOM
+
+  return (
+    <div className="relative h-full w-full">
+      <MapContainer
+        center={mapCenter}
+        zoom={mapZoom}
+        className="h-full w-full"
+        zoomControl={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
+        />
+        <MapEvents onBoundsChange={handleBoundsChange} />
+        <PropertyMarkers
+          properties={properties}
+          selectedId={selectedProperty?.id ?? null}
+          onSelect={setSelectedProperty}
+        />
+        {/* Ponto azul "você está aqui" */}
+        {userLat && userLng && (
+          <CircleMarker
+            center={[userLat, userLng]}
+            radius={10}
+            pathOptions={{ color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 1, weight: 3 }}
+          >
+            <Tooltip permanent direction="top" offset={[0, -12]} className="text-xs font-medium">
+              Você está aqui
+            </Tooltip>
+          </CircleMarker>
+        )}
+      </MapContainer>
+
+      {/* Loading indicator */}
+      {isFetching && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur rounded-full px-3 py-1 text-xs font-medium shadow flex items-center gap-2">
+          <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          Carregando...
+        </div>
+      )}
+
+      {/* Card deslizante do imóvel selecionado */}
+      {selectedProperty && (
+        <PropertyMapCard
+          property={selectedProperty}
+          onClose={() => setSelectedProperty(null)}
+        />
+      )}
+    </div>
+  )
+}
