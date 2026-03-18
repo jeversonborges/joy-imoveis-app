@@ -58,7 +58,7 @@ export function buildWhatsAppLink(phone: string, propertyTitle: string): string 
 }
 
 export function buildAddressFull(fields: {
-  address_street: string
+  address_street?: string | null
   address_number?: string | null
   address_complement?: string | null
   address_neighborhood?: string | null
