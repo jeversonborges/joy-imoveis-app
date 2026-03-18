@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
-  X, ChevronLeft, ChevronRight, BedDouble, Bath, Car,
-  Maximize2, MapPin, MessageCircle, Heart
+  X, ChevronLeft, ChevronRight, MapPin, Heart,
+  Expand, Moon, Droplets, ParkingCircle
 } from 'lucide-react'
 import type { MapProperty } from '@/types'
 import { formatCurrency, listingTypeLabel, propertyTypeLabel } from '@/lib/utils'
@@ -141,75 +141,72 @@ export function PropertyMapCard({ property: pin, onClose }: PropertyMapCardProps
 
         {/* Info */}
         <div className="p-4">
-          {/* Letreiro animado da descrição */}
+          {/* Título */}
+          <h3 className="font-bold text-base leading-tight line-clamp-1 mb-1">
+            {pin.title}
+          </h3>
+
+          {/* Descrição marquee */}
           {detail?.description && (
-            <div className="overflow-hidden mb-1.5">
+            <div className="overflow-hidden mb-2">
               <p className="text-xs text-muted-foreground whitespace-nowrap animate-marquee">
                 {detail.description}
               </p>
             </div>
           )}
 
-          {/* Título + preço */}
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h3 className="font-bold text-base leading-tight line-clamp-1 flex-1">
-              {pin.title}
-            </h3>
-            <div className="text-right shrink-0">
-              <p className="font-bold text-primary text-lg leading-none">
-                {formatCurrency(pin.price_cents)}
-              </p>
-              {pin.listing_type === 'rent' && (
-                <p className="text-xs text-muted-foreground">/mês</p>
-              )}
-            </div>
+          {/* Preço */}
+          <div className="flex items-baseline gap-1.5 mb-2">
+            <p className="font-bold text-primary text-xl leading-none">
+              {formatCurrency(pin.price_cents)}
+            </p>
+            {pin.listing_type === 'rent' && (
+              <span className="text-xs text-muted-foreground">/mês</span>
+            )}
           </div>
 
           {/* Stats */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-            <span>{propertyTypeLabel(pin.property_type)}</span>
+            <span className="bg-gray-100 rounded-full px-2 py-0.5">{propertyTypeLabel(pin.property_type)}</span>
             {detail?.area_m2 && (
               <span className="flex items-center gap-1">
-                <Maximize2 className="h-3 w-3" />{detail.area_m2}m²
+                <Expand className="h-3 w-3" />{detail.area_m2}m²
               </span>
             )}
             {pin.bedrooms > 0 && (
               <span className="flex items-center gap-1">
-                <BedDouble className="h-3 w-3" />{pin.bedrooms}
+                <Moon className="h-3 w-3" />{pin.bedrooms}
               </span>
             )}
             {detail?.bathrooms ? (
               <span className="flex items-center gap-1">
-                <Bath className="h-3 w-3" />{detail.bathrooms}
+                <Droplets className="h-3 w-3" />{detail.bathrooms}
               </span>
             ) : null}
             {detail?.parking_spots ? (
               <span className="flex items-center gap-1">
-                <Car className="h-3 w-3" />{detail.parking_spots}
+                <ParkingCircle className="h-3 w-3" />{detail.parking_spots}
               </span>
             ) : null}
           </div>
 
-          {/* Ações */}
-          <div className="flex gap-2">
-            <Link
-              href={`/imoveis/${pin.id}?lat=${pin.latitude}&lng=${pin.longitude}`}
-              className="flex-1 bg-primary text-white text-sm font-semibold rounded-xl py-2.5 text-center hover:bg-primary/90 transition-colors"
-            >
-              Ver detalhes
-            </Link>
-            {detail?.profiles?.whatsapp && (
-              <a
-                href={`https://wa.me/55${detail.profiles.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá! Vi seu imóvel "${pin.title}" no JoyNest e tenho interesse!`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-green-500 hover:bg-green-600 text-white rounded-xl px-4 flex items-center gap-1.5 text-sm font-semibold transition-colors"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Zap
-              </a>
-            )}
-          </div>
+          {/* Anunciante */}
+          {detail?.profiles && (
+            <div className="flex items-center gap-2 mb-3 pb-3 border-b border-gray-100">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                {(detail.profiles.full_name || 'A')[0].toUpperCase()}
+              </div>
+              <span className="text-xs text-muted-foreground truncate">{detail.profiles.full_name || 'Anunciante'}</span>
+            </div>
+          )}
+
+          {/* Ação */}
+          <Link
+            href={`/imoveis/${pin.id}?lat=${pin.latitude}&lng=${pin.longitude}`}
+            className="flex w-full items-center justify-center bg-primary text-white text-sm font-semibold rounded-xl py-2.5 hover:bg-primary/90 transition-colors"
+          >
+            Ver detalhes
+          </Link>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import {
-  MapPin, BedDouble, Bath, Car, Maximize2, Heart,
+  MapPin, Moon, Droplets, ParkingCircle, Expand, Heart,
   Share2, Phone, MessageCircle, ChevronLeft, ChevronRight,
   Building, Calendar, Tag
 } from 'lucide-react'
@@ -166,14 +166,14 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-xl">
             {p.area_m2 && (
               <div className="text-center">
-                <Maximize2 className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+                <Expand className="h-5 w-5 mx-auto mb-1 text-muted-foreground" strokeWidth={1.5} />
                 <p className="font-semibold">{formatArea(p.area_m2)}</p>
                 <p className="text-xs text-muted-foreground">Área</p>
               </div>
             )}
             {p.bedrooms > 0 && (
               <div className="text-center">
-                <BedDouble className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+                <Moon className="h-5 w-5 mx-auto mb-1 text-muted-foreground" strokeWidth={1.5} />
                 <p className="font-semibold">{p.bedrooms}</p>
                 <p className="text-xs text-muted-foreground">
                   {p.bedrooms === 1 ? 'Quarto' : 'Quartos'}
@@ -182,7 +182,7 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
             )}
             {p.bathrooms > 0 && (
               <div className="text-center">
-                <Bath className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+                <Droplets className="h-5 w-5 mx-auto mb-1 text-muted-foreground" strokeWidth={1.5} />
                 <p className="font-semibold">{p.bathrooms}</p>
                 <p className="text-xs text-muted-foreground">
                   {p.bathrooms === 1 ? 'Banheiro' : 'Banheiros'}
@@ -191,7 +191,7 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
             )}
             {p.parking_spots > 0 && (
               <div className="text-center">
-                <Car className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+                <ParkingCircle className="h-5 w-5 mx-auto mb-1 text-muted-foreground" strokeWidth={1.5} />
                 <p className="font-semibold">{p.parking_spots}</p>
                 <p className="text-xs text-muted-foreground">
                   {p.parking_spots === 1 ? 'Vaga' : 'Vagas'}
@@ -299,32 +299,15 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                {p.profiles.whatsapp ? (
-                  <a
-                    href={buildWhatsAppLink(p.profiles.whatsapp, p.title)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white rounded-xl py-2.5 font-medium text-sm transition-colors"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Falar no WhatsApp
-                  </a>
-                ) : (
-                  <p className="text-xs text-center text-muted-foreground py-2">
-                    Anunciante não informou contato de WhatsApp
-                  </p>
-                )}
-                {p.profiles.phone && (
-                  <a
-                    href={`tel:+55${p.profiles.phone}`}
-                    className="flex w-full items-center justify-center gap-2 border hover:bg-accent rounded-xl py-2.5 font-medium text-sm transition-colors"
-                  >
-                    <Phone className="h-4 w-4" />
-                    Ligar
-                  </a>
-                )}
-              </div>
+              {p.profiles.phone && (
+                <a
+                  href={`tel:+55${p.profiles.phone}`}
+                  className="flex w-full items-center justify-center gap-2 border hover:bg-accent rounded-xl py-2.5 font-medium text-sm transition-colors"
+                >
+                  <Phone className="h-4 w-4" />
+                  Ligar
+                </a>
+              )}
             </div>
           )}
         </div>

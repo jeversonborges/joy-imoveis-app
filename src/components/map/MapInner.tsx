@@ -83,7 +83,7 @@ function PropertyMarkers({
       const priceLabel = formatCurrencyShort(prop.price_cents)
       const type = prop.listing_type
       const color = type === 'sale' ? '#16a34a' : '#2563eb'
-      const borderColor = isSelected ? '#f59e0b' : color
+      const glowColor = type === 'sale' ? 'rgba(22,163,74,0.4)' : 'rgba(37,99,235,0.4)'
 
       // Pin formato casinha SVG pequeno, sem foto
       const icon = L.divIcon({
@@ -98,10 +98,10 @@ function PropertyMarkers({
           ">
             <div style="
               background:${color};
-              border: 2px solid ${borderColor};
+              border: 2px solid ${color};
               border-radius:10px 10px 10px 0;
               padding:5px 7px 4px;
-              box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+              box-shadow: ${isSelected ? `0 0 0 4px ${glowColor}, 0 6px 20px ${glowColor}` : '0 3px 10px rgba(0,0,0,0.22)'};
               display:flex;
               flex-direction:column;
               align-items:center;
@@ -137,6 +137,20 @@ function PropertyMarkers({
       markersRef.current = []
     }
   }, [properties, selectedId, map])
+
+  return null
+}
+
+function FlyToUser({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap()
+  const flew = useRef(false)
+
+  useEffect(() => {
+    if (!flew.current) {
+      flew.current = true
+      map.flyTo([lat, lng], CITY_MAP_ZOOM, { duration: 1.2 })
+    }
+  }, [lat, lng, map])
 
   return null
 }
@@ -226,9 +240,11 @@ export default function MapInner({ filters, onPropertyClick }: MapInnerProps) {
           selectedId={selectedProperty?.id ?? null}
           onSelect={setSelectedProperty}
         />
-        {/* Silhueta de pessoa "você está aqui" */}
         {userLat && userLng && (
-          <UserLocationMarker lat={userLat} lng={userLng} />
+          <>
+            <FlyToUser lat={userLat} lng={userLng} />
+            <UserLocationMarker lat={userLat} lng={userLng} />
+          </>
         )}
       </MapContainer>
 

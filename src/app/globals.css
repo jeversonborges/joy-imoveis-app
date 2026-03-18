@@ -63,6 +63,12 @@
 .leaflet-container {
   font-family: inherit;
   z-index: 0;
+  touch-action: none;
+}
+
+/* Previne delay de 300ms em todos os elementos clicáveis */
+a, button, [role="button"] {
+  touch-action: manipulation;
 }
 
 /* Custom price marker */

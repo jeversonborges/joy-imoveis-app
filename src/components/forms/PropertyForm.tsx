@@ -306,6 +306,7 @@ export function PropertyForm() {
                         decimalSeparator=","
                         thousandSeparator="."
                         decimalScale={2}
+                        inputMode="decimal"
                         value={field.value ?? ''}
                         onValueChange={(v) => field.onChange(v.floatValue)}
                       />
@@ -314,19 +315,19 @@ export function PropertyForm() {
                 </div>
                 <div>
                   <Label>Andar</Label>
-                  <Input type="number" {...register('floor', { valueAsNumber: true })} className="mt-1" min={0} />
+                  <Input type="number" inputMode="numeric" {...register('floor', { valueAsNumber: true })} className="mt-1" min={0} />
                 </div>
                 <div>
                   <Label>Quartos</Label>
-                  <Input type="number" {...register('bedrooms', { valueAsNumber: true })} className="mt-1" min={0} max={20} />
+                  <Input type="number" inputMode="numeric" {...register('bedrooms', { valueAsNumber: true })} className="mt-1" min={0} max={20} />
                 </div>
                 <div>
                   <Label>Banheiros</Label>
-                  <Input type="number" {...register('bathrooms', { valueAsNumber: true })} className="mt-1" min={0} max={20} />
+                  <Input type="number" inputMode="numeric" {...register('bathrooms', { valueAsNumber: true })} className="mt-1" min={0} max={20} />
                 </div>
                 <div>
                   <Label>Vagas de garagem</Label>
-                  <Input type="number" {...register('parking_spots', { valueAsNumber: true })} className="mt-1" min={0} />
+                  <Input type="number" inputMode="numeric" {...register('parking_spots', { valueAsNumber: true })} className="mt-1" min={0} />
                 </div>
               </div>
 
