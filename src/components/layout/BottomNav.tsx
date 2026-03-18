@@ -52,7 +52,7 @@ function IconProfile({ active }: { active: boolean }) {
 const NAV_ITEMS = [
   { href: '/',             label: 'Mapa',     renderIcon: (a: boolean) => <IconCompass active={a} /> },
   { href: '/imoveis',      label: 'Buscar',   renderIcon: (a: boolean) => <IconSearch active={a} /> },
-  { href: '/imoveis/novo', label: 'Anunciar', renderIcon: () => <IconPlus />, highlight: true },
+  { href: '/imoveis/novo', label: 'Anunciar', renderIcon: (_a: boolean) => <IconPlus />, highlight: true },
   { href: '/favoritos',    label: 'Salvos',   renderIcon: (a: boolean) => <IconBookmark active={a} /> },
   { href: '/perfil',       label: 'Perfil',   renderIcon: (a: boolean) => <IconProfile active={a} /> },
 ]
