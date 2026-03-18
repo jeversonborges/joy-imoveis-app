@@ -9,7 +9,7 @@ import { PropertyDetail } from './PropertyDetail'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export function PropertyDetailPage({ id }: { id: string }) {
+export default function PropertyDetailPage({ id }: { id: string }) {
   const searchParams = useSearchParams()
   const [property, setProperty] = useState<Property | null>(null)
   const [loading, setLoading] = useState(true)

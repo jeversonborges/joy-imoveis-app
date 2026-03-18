@@ -139,6 +139,11 @@
   @apply bg-gray-400;
 }
 
+/* Map tiles enhanced contrast */
+.map-tiles-enhanced {
+  filter: contrast(1.15) saturate(1.4) brightness(0.95);
+}
+
 /* Pin hover grow effect */
 .map-pin-item {
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;

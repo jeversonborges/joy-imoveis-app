@@ -300,7 +300,7 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
               </div>
 
               <div className="space-y-2">
-                {p.profiles.whatsapp && (
+                {p.profiles.whatsapp ? (
                   <a
                     href={buildWhatsAppLink(p.profiles.whatsapp, p.title)}
                     target="_blank"
@@ -308,8 +308,12 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
                     className="flex w-full items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white rounded-xl py-2.5 font-medium text-sm transition-colors"
                   >
                     <MessageCircle className="h-4 w-4" />
-                    WhatsApp
+                    Falar no WhatsApp
                   </a>
+                ) : (
+                  <p className="text-xs text-center text-muted-foreground py-2">
+                    Anunciante não informou contato de WhatsApp
+                  </p>
                 )}
                 {p.profiles.phone && (
                   <a
@@ -327,8 +331,8 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
       </div>
 
       {/* Botão WhatsApp flutuante no mobile */}
-      {p.profiles?.whatsapp && (
-        <div className="lg:hidden fixed bottom-20 inset-x-0 px-4 z-40 pointer-events-none">
+      <div className="lg:hidden fixed bottom-20 inset-x-0 px-4 z-40 pointer-events-none">
+        {p.profiles?.whatsapp ? (
           <a
             href={buildWhatsAppLink(p.profiles.whatsapp, p.title)}
             target="_blank"
@@ -338,8 +342,13 @@ export function PropertyDetail({ property: p, lat, lng }: PropertyDetailProps) {
             <MessageCircle className="h-5 w-5" />
             Falar no WhatsApp
           </a>
-        </div>
-      )}
+        ) : (
+          <div className="pointer-events-auto flex items-center justify-center gap-2 w-full bg-gray-100 text-gray-400 font-medium rounded-2xl py-4 shadow text-sm">
+            <MessageCircle className="h-5 w-5" />
+            Anunciante não informou WhatsApp
+          </div>
+        )}
+      </div>
     </div>
   )
 }

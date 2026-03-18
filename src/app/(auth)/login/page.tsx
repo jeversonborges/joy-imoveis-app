@@ -95,7 +95,9 @@ function LoginContent() {
             </svg>
           </div>
 
-          <h1 className="text-[44px] font-bold tracking-[-1.5px] text-gray-900 leading-none">Joy</h1>
+          <h1 className="text-[44px] leading-none mt-1" style={{fontFamily: 'Georgia, serif', letterSpacing: '-1px'}}>
+            <span className="font-bold italic text-blue-700">Joy</span><span className="font-light text-gray-700" style={{letterSpacing: '4px', fontSize: '38px'}}>NES</span>
+          </h1>
           <p className="text-[13px] text-gray-400 mt-3 text-center leading-snug font-medium tracking-wide">
             Seu próximo imóvel está aqui
           </p>

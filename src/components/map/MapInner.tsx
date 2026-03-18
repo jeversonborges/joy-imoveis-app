@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { MapContainer, TileLayer, useMap, useMapEvents, CircleMarker, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useMapProperties } from '@/hooks/useMapProperties'
@@ -85,41 +85,44 @@ function PropertyMarkers({
       const color = type === 'sale' ? '#16a34a' : '#2563eb'
       const borderColor = isSelected ? '#f59e0b' : color
 
-      const photoHtml = prop.cover_photo_url
-        ? `<img src="${prop.cover_photo_url}" style="width:100%;height:52px;object-fit:cover;display:block;" />`
-        : `<div style="width:100%;height:52px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:20px;">🏠</div>`
-
+      // Pin formato casinha SVG pequeno, sem foto
       const icon = L.divIcon({
         className: '',
         html: `
           <div class="map-pin-item" style="
-            width:80px;
-            border-radius:12px;
-            overflow:hidden;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-            border: 2.5px solid ${borderColor};
-            background:white;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
             cursor:pointer;
-            transform: ${isSelected ? 'scale(1.12)' : 'scale(1)'};
-            transition: transform 0.15s ease;
+            transform: ${isSelected ? 'scale(1.18)' : 'scale(1)'};
           ">
-            ${photoHtml}
             <div style="
               background:${color};
-              color:white;
-              text-align:center;
-              font-size:10px;
-              font-weight:700;
-              padding:3px 4px;
-              line-height:1.2;
-              white-space:nowrap;
-              overflow:hidden;
-              text-overflow:ellipsis;
-            ">${priceLabel}</div>
+              border: 2px solid ${borderColor};
+              border-radius:10px 10px 10px 0;
+              padding:5px 7px 4px;
+              box-shadow: 0 3px 10px rgba(0,0,0,0.22);
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              gap:2px;
+            ">
+              <svg width="18" height="16" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2L2 9h2.5v7h4v-4h3v4h4V9H18L10 2z" fill="white" fill-opacity="0.95"/>
+              </svg>
+              <span style="
+                color:white;
+                font-size:9px;
+                font-weight:700;
+                white-space:nowrap;
+                line-height:1;
+              ">${priceLabel}</span>
+            </div>
+            <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid ${color};margin-top:-1px;"></div>
           </div>
         `,
-        iconSize: [80, 76],
-        iconAnchor: [40, 76],
+        iconSize: [56, 52],
+        iconAnchor: [28, 52],
       })
 
       const marker = L.marker([prop.latitude, prop.longitude], { icon })
@@ -134,6 +137,51 @@ function PropertyMarkers({
       markersRef.current = []
     }
   }, [properties, selectedId, map])
+
+  return null
+}
+
+function UserLocationMarker({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap()
+
+  useEffect(() => {
+    const icon = L.divIcon({
+      className: '',
+      html: `
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <div style="
+            background:#2563eb;
+            border-radius:50%;
+            width:36px;height:36px;
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 2px 8px rgba(37,99,235,0.5);
+            border:2.5px solid white;
+          ">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="7" r="4" fill="white"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #2563eb;margin-top:-1px;"></div>
+          <span style="
+            margin-top:3px;
+            background:rgba(37,99,235,0.9);
+            color:white;
+            font-size:9px;
+            font-weight:600;
+            padding:2px 6px;
+            border-radius:8px;
+            white-space:nowrap;
+          ">Você está aqui</span>
+        </div>
+      `,
+      iconSize: [36, 60],
+      iconAnchor: [18, 42],
+    })
+
+    const marker = L.marker([lat, lng], { icon }).addTo(map)
+    return () => { marker.remove() }
+  }, [lat, lng, map])
 
   return null
 }
@@ -170,6 +218,7 @@ export default function MapInner({ filters, onPropertyClick }: MapInnerProps) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           maxZoom={19}
+          className="map-tiles-enhanced"
         />
         <MapEvents onBoundsChange={handleBoundsChange} />
         <PropertyMarkers
@@ -177,17 +226,9 @@ export default function MapInner({ filters, onPropertyClick }: MapInnerProps) {
           selectedId={selectedProperty?.id ?? null}
           onSelect={setSelectedProperty}
         />
-        {/* Ponto azul "você está aqui" */}
+        {/* Silhueta de pessoa "você está aqui" */}
         {userLat && userLng && (
-          <CircleMarker
-            center={[userLat, userLng]}
-            radius={10}
-            pathOptions={{ color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 1, weight: 3 }}
-          >
-            <Tooltip permanent direction="top" offset={[0, -12]} className="text-xs font-medium">
-              Você está aqui
-            </Tooltip>
-          </CircleMarker>
+          <UserLocationMarker lat={userLat} lng={userLng} />
         )}
       </MapContainer>
 

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { APP_NAME } from '@/lib/constants'
-import { PropertyDetailPage } from '@/components/property/PropertyDetailPage'
+import PropertyDetailPage from '@/components/property/PropertyDetailPage'
 import { Loader2 } from 'lucide-react'
 
 interface Props {
