@@ -27,20 +27,29 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session — IMPORTANTE: não remova essa linha
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const pathname = request.nextUrl.pathname
   const isProtected = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route)
   )
 
-  if (isProtected && !user) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (isProtected && !user) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+  } catch {
+    // Se Supabase falhar, apenas serve a página normalmente
+    // Rotas protegidas redirecionam para login por segurança
+    if (isProtected) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
   }
 
   return supabaseResponse
