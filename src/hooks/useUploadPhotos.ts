@@ -53,14 +53,20 @@ export function useUploadPhotos(): UseUploadPhotosReturn {
 
         try {
           // Comprime a imagem antes do upload
-          const compressed = await imageCompression(file, {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1400,
-            useWebWorker: false,
-            onProgress: (pct) => {
-              setProgress((p) => ({ ...p, [file.name]: Math.floor(pct * 0.5) }))
-            },
-          })
+          let compressed: File = file
+          try {
+            compressed = await imageCompression(file, {
+              maxSizeMB: 1,
+              maxWidthOrHeight: 1400,
+              useWebWorker: false,
+              onProgress: (pct) => {
+                setProgress((p) => ({ ...p, [file.name]: Math.floor(pct * 0.5) }))
+              },
+            })
+          } catch {
+            // Se a compressão falhar, usa o arquivo original
+            compressed = file
+          }
 
           setProgress((p) => ({ ...p, [file.name]: 55 }))
 
@@ -75,7 +81,7 @@ export function useUploadPhotos(): UseUploadPhotosReturn {
               upsert: false,
             })
 
-          if (uploadError) throw uploadError
+          if (uploadError) throw new Error(`Upload falhou: ${uploadError.message}`)
 
           setProgress((p) => ({ ...p, [file.name]: 90 }))
 
