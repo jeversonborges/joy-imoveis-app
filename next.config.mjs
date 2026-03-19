@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
-// build: 2
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: 'https://elomphphxwnblaxdhgor.supabase.co',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_publishable_fyCwjPQ7_6pa3bpXkYdHfA_HS2wpfgv',
+  },
   images: {
     remotePatterns: [
       {
