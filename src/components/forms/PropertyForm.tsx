@@ -89,9 +89,13 @@ export function PropertyForm() {
       let finalPhotoUrls = photoUrls
 
       if (pendingFiles.length > 0) {
-        const uploaded = await uploadPhotos(pendingFiles, tempId)
-        finalPhotoUrls = [...(photoUrls || []), ...uploaded]
-        setValue('photo_urls', finalPhotoUrls)
+        try {
+          const uploaded = await uploadPhotos(pendingFiles, tempId)
+          finalPhotoUrls = [...(photoUrls || []), ...uploaded]
+          setValue('photo_urls', finalPhotoUrls)
+        } catch {
+          toast({ title: 'Foto não enviada', description: 'Anúncio publicado sem foto. Edite depois para adicionar.', variant: 'destructive' })
+        }
       }
 
       const property = await createProperty({

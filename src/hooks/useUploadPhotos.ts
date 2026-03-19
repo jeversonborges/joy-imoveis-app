@@ -56,7 +56,7 @@ export function useUploadPhotos(): UseUploadPhotosReturn {
           const compressed = await imageCompression(file, {
             maxSizeMB: 1,
             maxWidthOrHeight: 1400,
-            useWebWorker: true,
+            useWebWorker: false,
             onProgress: (pct) => {
               setProgress((p) => ({ ...p, [file.name]: Math.floor(pct * 0.5) }))
             },
