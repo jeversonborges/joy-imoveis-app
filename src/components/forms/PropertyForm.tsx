@@ -109,7 +109,8 @@ export function PropertyForm() {
 
       router.push(`/imoveis/${(property as any).id}`)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erro ao publicar anúncio'
+      const msg = err instanceof Error ? err.message : String(err)
+      alert(`Erro ao publicar: ${msg}`)
       toast({ title: 'Erro ao publicar', description: msg, variant: 'destructive' })
     }
   }
