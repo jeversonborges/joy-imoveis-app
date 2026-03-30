@@ -1,6 +1,3 @@
-Perfeito — vou deixar mais limpo, profissional e ainda com personalidade, sem poluição visual:
-
----
 
 # Joy Imóveis App
 
